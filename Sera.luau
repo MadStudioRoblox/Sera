@@ -254,7 +254,7 @@ Sera.LossyCFrame = table.freeze({
 				buffer.readf32(b, offset + 16),
 				buffer.readf32(b, offset + 20)
 			),
-			buffer.readf32(b, offset :: number + 24)
+			buffer.readf32(b, offset + 24)
 			)
 			+ Vector3.new(
 				buffer.readf32(b, offset),
