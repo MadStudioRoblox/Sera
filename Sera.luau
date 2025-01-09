@@ -21,7 +21,8 @@ MAD STUDIO
 		Sera.Float32
 		Sera.Float64
 
-		Sera.CFrame
+		Sera.CFrame -- 48 bytes; Full precision
+		Sera.LossyCFrame -- 28 bytes; Less than 0.0005 degree precision error for rotation
 		Sera.Vector3
 		Sera.Color3
 
@@ -230,6 +231,36 @@ Sera.CFrame = table.freeze({
 			buffer.readf32(b, offset + 40),
 			buffer.readf32(b, offset + 44)
 		), offset + 48
+	end,
+})
+
+Sera.LossyCFrame = table.freeze({
+	Name = "LossyCFrame",
+	Ser = function(b: buffer, offset: number, value: CFrame): number
+		local axis, angle = value:ToAxisAngle()
+		buffer.writef32(b, offset, value.X)
+		buffer.writef32(b, offset + 4, value.Y)
+		buffer.writef32(b, offset + 8, value.Z)
+		buffer.writef32(b, offset + 12, axis.X)
+		buffer.writef32(b, offset + 16, axis.Y)
+		buffer.writef32(b, offset + 20, axis.Z)
+		buffer.writef32(b, offset + 24, angle)
+		return offset + 28
+	end,
+	Des = function(b: buffer, offset: number): (CFrame, number)
+		return CFrame.fromAxisAngle(
+			Vector3.new(
+				buffer.readf32(b, offset + 12),
+				buffer.readf32(b, offset + 16),
+				buffer.readf32(b, offset + 20)
+			),
+			buffer.readf32(b, offset :: number + 24)
+			)
+			+ Vector3.new(
+				buffer.readf32(b, offset),
+				buffer.readf32(b, offset + 4),
+				buffer.readf32(b, offset + 8)
+			), offset + 28
 	end,
 })
 
