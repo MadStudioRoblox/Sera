@@ -25,6 +25,7 @@ MAD STUDIO
 		Sera.LossyCFrame -- 28 bytes; Less than 0.0005 degree precision error for rotation
 		Sera.Vector3
 		Sera.Color3
+		Sera.ColorV3 -- Input and output are Vector3's with [0, 1] color values
 
 		Sera.String8  -- Max 255 size
 		Sera.String16 -- Max 65,535 size
@@ -33,6 +34,8 @@ MAD STUDIO
 		Sera.Buffer8  -- Max 255 size
 		Sera.Buffer16 -- Max 65,535 size
 		Sera.Buffer32 -- Max 4,294,967,295 size
+		
+		Sera.Angle8 -- (Unsigned) Radian representation in one byte while preserving cardinal direction accuracy (Every 45 degrees)
 
 	Functions:
 
@@ -91,7 +94,9 @@ export type Schema = {
 	String: {[string]: Field},
 }
 
-local Sera = {}
+local Sera = {
+	BB = BB,
+}
 
 Sera.Boolean = table.freeze({
 	Name = "Boolean",
@@ -254,7 +259,7 @@ Sera.LossyCFrame = table.freeze({
 				buffer.readf32(b, offset + 16),
 				buffer.readf32(b, offset + 20)
 			),
-			buffer.readf32(b, offset + 24)
+			buffer.readf32(b, offset :: number + 24)
 			)
 			+ Vector3.new(
 				buffer.readf32(b, offset),
@@ -294,6 +299,23 @@ Sera.Color3 = table.freeze({
 			buffer.readu8(b, offset),
 			buffer.readu8(b, offset + 1),
 			buffer.readu8(b, offset + 2)
+		), offset + 3
+	end,
+})
+
+Sera.ColorV3 = table.freeze({
+	Name = "ColorV3",
+	Ser = function(b: buffer, offset: number, value: Vector3): number
+		buffer.writeu8(b, offset, value.X * 255 // 1)
+		buffer.writeu8(b, offset + 1, value.Y * 255 // 1)
+		buffer.writeu8(b, offset + 2, value.Z * 255 // 1)
+		return offset + 3
+	end,
+	Des = function(b: buffer, offset: number): (Vector3, number)
+		return Vector3.new(
+			buffer.readu8(b, offset) / 255,
+			buffer.readu8(b, offset + 1) / 255,
+			buffer.readu8(b, offset + 2) / 255
 		), offset + 3
 	end,
 })
@@ -405,6 +427,40 @@ Sera.Buffer32 = table.freeze({
 		return value, offset + 4 + length
 	end,
 })
+
+do
+	
+	local rad2 = math.pi * 2
+	local angle8range = math.rad(359)
+
+	local function DegEncode(deg: number): number
+		return math.round((deg % rad2) * 255 / angle8range)
+	end
+
+	local DegDecodeLookup: {number} = {}
+
+	for i = 0, 255 do
+		DegDecodeLookup[i] = i * angle8range / 255
+	end
+
+	for i = 0, 315, 45 do
+		local r = math.rad(i)
+		local index = DegEncode(r)
+		DegDecodeLookup[index] = r
+	end
+	
+	Sera.Angle8 = table.freeze({
+		Name = "Angle8",
+		Ser = function(b: buffer, offset: number, value: number): number
+			buffer.writeu8(b, offset, DegEncode(value))
+			return offset + 1
+		end,
+		Des = function(b: buffer, offset: number): (number, number)
+			return DegDecodeLookup[buffer.readu8(b, offset)], offset + 1
+		end,
+	})
+	
+end
 
 ----
 
