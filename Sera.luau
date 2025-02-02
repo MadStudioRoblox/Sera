@@ -289,9 +289,9 @@ Sera.Vector3 = table.freeze({
 Sera.Color3 = table.freeze({
 	Name = "Color3",
 	Ser = function(b: buffer, offset: number, value: Color3): number
-		buffer.writeu8(b, offset, value.R * 255 // 1)
-		buffer.writeu8(b, offset + 1, value.G * 255 // 1)
-		buffer.writeu8(b, offset + 2, value.B * 255 // 1)
+		buffer.writeu8(b, offset, value.R * 255)
+		buffer.writeu8(b, offset + 1, value.G * 255)
+		buffer.writeu8(b, offset + 2, value.B * 255)
 		return offset + 3
 	end,
 	Des = function(b: buffer, offset: number): (Color3, number)
@@ -306,9 +306,9 @@ Sera.Color3 = table.freeze({
 Sera.ColorV3 = table.freeze({
 	Name = "ColorV3",
 	Ser = function(b: buffer, offset: number, value: Vector3): number
-		buffer.writeu8(b, offset, value.X * 255 // 1)
-		buffer.writeu8(b, offset + 1, value.Y * 255 // 1)
-		buffer.writeu8(b, offset + 2, value.Z * 255 // 1)
+		buffer.writeu8(b, offset, value.X * 255)
+		buffer.writeu8(b, offset + 1, value.Y * 255)
+		buffer.writeu8(b, offset + 2, value.Z * 255)
 		return offset + 3
 	end,
 	Des = function(b: buffer, offset: number): (Vector3, number)
