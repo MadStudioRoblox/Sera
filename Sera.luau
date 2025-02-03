@@ -581,7 +581,7 @@ function Sera.DeltaDeserialize(schema: Schema, b: buffer, offset: number?): ({[s
 
 	local lookup = schema.Numeric
 
-	for i = 1, field_count do
+	for _ = 1, field_count do
 		local field = lookup[buffer.readu8(b, offset :: number)]
 		result[field.Key], offset = field.Des(b, offset :: number + 1)
 	end
@@ -597,7 +597,7 @@ local function DeltaSerializeUnsafe(schema: Schema, t: {[any]: any}): number
 
 	local lookup = schema.String
 
-	for key, value in t do
+	for key, _ in t do
 		field_count += 1
 		local field = lookup[key]
 		buffer.writeu8(BB, offset, field.Index)
@@ -657,7 +657,7 @@ local function DeltaPushUnsafe(schema: Schema, t: {[any]: any}, b: buffer, offse
 
 	local lookup = schema.String
 
-	for key, value in t do
+	for key, _ in t do
 		field_count += 1
 		local field = lookup[key]
 		buffer.writeu8(b, offset, field.Index)
@@ -674,7 +674,6 @@ end
 function Sera.DeltaPush(schema: Schema, t: {[any]: any}, b: buffer, offset: number?): (number?, string?)
 
 	offset = offset or 0
-	local original_offset = offset :: number
 	local success
 	success, offset = pcall(DeltaPushUnsafe, schema, t, b, offset :: number)
 
