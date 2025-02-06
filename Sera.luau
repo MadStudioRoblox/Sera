@@ -52,14 +52,14 @@ MAD STUDIO
 		-- When all fields are present (Non-schema fields are ignored; Missing fields will throw an error):
 
 		Sera.Deserialize(schema: Schema, b: buffer, offset: number?): ({[string]: any}, offset: number)
-		Sera.Serialize(schema: Schema, t: {[any]: any}): (buffer?, err: string?)
-		Sera.Push(schema: Schema, t: {[any]: any}, b: buffer, offset: number?): (offset: number?, err: string?)
+		Sera.Serialize(schema: Schema, t: {[string]: any}): (buffer?, err: string?)
+		Sera.Push(schema: Schema, t: {[string]: any}, b: buffer, offset: number?): (offset: number?, err: string?)
 
 		-- When only some fields are present (Non-schema fields will throw an error):
 
 		Sera.DeltaDeserialize(schema: Schema, b: buffer, offset: number?): ({[string]: any}, offset: number)
-		Sera.DeltaSerialize(schema: Schema, t: {[any]: any}): (buffer?, err: string?)
-		Sera.DeltaPush(schema: Schema, t: {[any]: any}, b: buffer, offset: number?): (offset: number?, err: string?)
+		Sera.DeltaSerialize(schema: Schema, t: {[string]: any}): (buffer?, err: string?)
+		Sera.DeltaPush(schema: Schema, t: {[string]: any}, b: buffer, offset: number?): (offset: number?, err: string?)
 
 		-- Delta serialization has an additional size cost of (n + 1) bytes where "n" is the number of fields present
 		-- in a table that's being serialized (1 byte for present field count, 1 enumerating byte for each field)
@@ -478,7 +478,7 @@ function Sera.Deserialize(schema: Schema, b: buffer, offset: number?): ({[string
 
 end
 
-local function SerializeUnsafe(schema: Schema, t: {[any]: any}): number
+local function SerializeUnsafe(schema: Schema, t: {[string]: any}): number
 
 	local offset = 0
 
@@ -491,7 +491,7 @@ local function SerializeUnsafe(schema: Schema, t: {[any]: any}): number
 end
 
 -- Returns new buffer of serialized schema or error message if fail.
-function Sera.Serialize(schema: Schema, t: {[any]: any}): (buffer?, string?)
+function Sera.Serialize(schema: Schema, t: any): (buffer?, string?)
 
 	local success, offset = pcall(SerializeUnsafe, schema, t)
 
@@ -526,7 +526,7 @@ function Sera.Serialize(schema: Schema, t: {[any]: any}): (buffer?, string?)
 
 end
 
-local function PushUnsafe(schema: Schema, t: {[any]: any}, b: buffer, offset: number): number
+local function PushUnsafe(schema: Schema, t: {[string]: any}, b: buffer, offset: number): number
 
 	for _, field in schema.Numeric do
 		offset = field.Ser(b, offset, t[field.Key])
@@ -537,7 +537,7 @@ local function PushUnsafe(schema: Schema, t: {[any]: any}, b: buffer, offset: nu
 end
 
 -- Pushes serialized schema to an existing buffer; Returns new buffer offset or error message if fail.
-function Sera.Push(schema: Schema, t: {[any]: any}, b: buffer, offset: number?): (number?, string?)
+function Sera.Push(schema: Schema, t: any, b: buffer, offset: number?): (number?, string?)
 
 	offset = offset or 0
 	local original_offset = offset :: number
@@ -590,7 +590,7 @@ function Sera.DeltaDeserialize(schema: Schema, b: buffer, offset: number?): ({[s
 
 end
 
-local function DeltaSerializeUnsafe(schema: Schema, t: {[any]: any}): number
+local function DeltaSerializeUnsafe(schema: Schema, t: {[string]: any}): number
 
 	local field_count = 0
 	local offset = 1
@@ -611,7 +611,7 @@ local function DeltaSerializeUnsafe(schema: Schema, t: {[any]: any}): number
 end
 
 -- Returns new buffer of serialized deltas or error message if fail.
-function Sera.DeltaSerialize(schema: Schema, t: {[any]: any}): (buffer?, string?)
+function Sera.DeltaSerialize(schema: Schema, t: any): (buffer?, string?)
 
 	local success, offset = pcall(DeltaSerializeUnsafe, schema, t)
 
@@ -649,7 +649,7 @@ function Sera.DeltaSerialize(schema: Schema, t: {[any]: any}): (buffer?, string?
 
 end
 
-local function DeltaPushUnsafe(schema: Schema, t: {[any]: any}, b: buffer, offset: number): number
+local function DeltaPushUnsafe(schema: Schema, t: {[string]: any}, b: buffer, offset: number): number
 
 	local field_count = 0
 	local start_offset = offset
@@ -671,7 +671,7 @@ local function DeltaPushUnsafe(schema: Schema, t: {[any]: any}, b: buffer, offse
 end
 
 -- Pushes serialized deltas to an existing buffer; Returns new buffer offset or error message if fail.
-function Sera.DeltaPush(schema: Schema, t: {[any]: any}, b: buffer, offset: number?): (number?, string?)
+function Sera.DeltaPush(schema: Schema, t: any, b: buffer, offset: number?): (number?, string?)
 
 	offset = offset or 0
 	local original_offset = offset :: number
