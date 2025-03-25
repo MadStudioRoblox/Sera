@@ -597,7 +597,7 @@ local function DeltaSerializeUnsafe(schema: Schema, t: {[string]: any}): number
 
 	local lookup = schema.String
 
-	for key, _ in t do
+	for key in t do
 		field_count += 1
 		local field = lookup[key]
 		buffer.writeu8(BB, offset, field.Index)
@@ -657,7 +657,7 @@ local function DeltaPushUnsafe(schema: Schema, t: {[string]: any}, b: buffer, of
 
 	local lookup = schema.String
 
-	for key, _ in t do
+	for key in t do
 		field_count += 1
 		local field = lookup[key]
 		buffer.writeu8(b, offset, field.Index)
